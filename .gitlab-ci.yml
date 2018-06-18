@@ -16,24 +16,6 @@ build-master:
   only:
     - master
 
-rabbitmq:
-  stage: build
-  script: |
-    container=rabbitmq
-    docker build --pull -t "${CI_REGISTRY_IMAGE}/${container}:${CI_COMMIT_REF_SLUG/${container}-/}" ./${container}
-    docker push "${CI_REGISTRY_IMAGE}/${container}:${CI_COMMIT_REF_SLUG/${container}-/}"
-  only:
-    - /rabbitmq\//
-
-squid:
-  stage: build
-  script: |
-    container=squid
-    docker build --pull -t "${CI_REGISTRY_IMAGE}/${container}:${CI_COMMIT_REF_SLUG/${container}-/}" ./${container}
-    docker push "${CI_REGISTRY_IMAGE}/${container}:${CI_COMMIT_REF_SLUG/${container}-/}"
-  only:
-    - /squid\//
-
 build-branches:
   stage: build
   script: |
