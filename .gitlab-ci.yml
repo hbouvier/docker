@@ -33,3 +33,12 @@ squid:
     docker push "${CI_REGISTRY_IMAGE}/${container}:${CI_COMMIT_REF_SLUG/${container}-/}"
   only:
     - /squid\//
+
+nginx:
+  stage: build
+  script: |
+    container=nginx
+    docker build --pull -t "${CI_REGISTRY_IMAGE}/${container}:${CI_COMMIT_REF_SLUG/${container}-/}" ./${container}
+    docker push "${CI_REGISTRY_IMAGE}/${container}:${CI_COMMIT_REF_SLUG/${container}-/}"
+  only:
+    - /nginx\//

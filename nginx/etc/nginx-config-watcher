@@ -1,0 +1,34 @@
+#!/bin/sh
+
+PID=$$ # PID of this running scrip
+DELAY=5 # delay in seconds
+PID_FILE="/var/run/nginx-config-watcher.${PID}.pid" # File in which we'll save the PID of the nginx-reload child
+rm -f "${PID_FILE}"
+
+printf "$(date "+%Y/%m/%d %H:%M:%S") [notice] NGINX watching /etc/nginx/conf.d/ (PID: ${PID})\n"
+
+function delay_reload() {
+  filename="$1"
+
+  # Do we have a 'reload' pending.
+  if [ -r "${PID_FILE}" ]; then
+    DELAY_PID=$(cat "${PID_FILE}")
+    rm -f "${PID_FILE}"
+    kill ${DELAY_PID} 2>&1 >/dev/null || true
+  fi
+  /bin/sh -c 'sleep '${DELAY}' ; printf "$(date "+%Y/%m/%d %H:%M:%S") [notice] NGINX reloading config due to '${filename}'\n" ; nginx -s reload ; rm -f "'${PID_FILE}'"' &
+  printf "$!" > "${PID_FILE}"
+}
+
+mkdir -p /etc/nginx/conf.d /etc/nginx/passwords /tmp/nginx/conf.d /tmp/nginx/passwords
+rsync -avq --copy-links /etc/nginx/conf.d/ /tmp/nginx/conf.d/
+rsync -avq --copy-links /etc/nginx/passwords/ /tmp/nginx/passwords/
+
+(while [ true ] ; do rsync -avq --copy-links /etc/nginx/conf.d/  /tmp/nginx/conf.d/ ; rsync -avq --copy-links /etc/nginx/passwords/ /tmp/nginx/passwords/ ; sleep 60 ; done) &
+
+
+inotifywait -m -e modify /tmp/nginx/conf.d /tmp/nginx/passwords |
+  while read path _ filename ; do
+    printf "$(date "+%Y/%m/%d %H:%M:%S") [debug] NGINX queued reload in ${DELAY} seconds due to changes in ${path}${filename}\n"
+    delay_reload "${path}${filename}"
+  done

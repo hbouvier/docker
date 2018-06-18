@@ -1,0 +1,9 @@
+{
+  "Processes":[{
+    "Name"    : "nginx",
+    "Command" : ["/usr/sbin/nginx", "-g", "daemon off;"]
+  },{
+    "Name"    : "config-watcher",
+    "Command" : ["/etc/nginx-config-watcher"]
+  }]
+}
