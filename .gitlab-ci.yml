@@ -9,7 +9,7 @@ before_script:
 build-master:
   stage: build
   script: |
-    for container in $(ls -d) ; do
+    for container in $(ls -d */ | sed 's^/^^g') ; do
       docker build --pull -t "${CI_REGISTRY_IMAGE}/${container}" ./${container}
       docker push "${CI_REGISTRY_IMAGE}/${container}"
     done
