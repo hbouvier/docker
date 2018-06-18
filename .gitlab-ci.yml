@@ -9,7 +9,7 @@ before_script:
 build-master:
   stage: build
   script: |
-    for container in rabbitmq squid nginx ; do
+    for container in $(ls -d) ; do
       docker build --pull -t "${CI_REGISTRY_IMAGE}/${container}" ./${container}
       docker push "${CI_REGISTRY_IMAGE}/${container}"
     done
@@ -34,11 +34,11 @@ squid:
   only:
     - /squid\//
 
-nginx:
+build-branches:
   stage: build
   script: |
-    container=nginx
+    container=$(echo ${CI_COMMIT_REF_SLUG} | cut -f1 -d/)
     docker build --pull -t "${CI_REGISTRY_IMAGE}/${container}:${CI_COMMIT_REF_SLUG/${container}-/}" ./${container}
     docker push "${CI_REGISTRY_IMAGE}/${container}:${CI_COMMIT_REF_SLUG/${container}-/}"
-  only:
-    - /nginx\//
+  except:
+    - master
