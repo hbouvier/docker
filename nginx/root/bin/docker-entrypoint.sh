@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/sh -e
 
 if [ "${NGINX_ENABLE_RESOLVER}" != "" ] ; then
   RESOLVER=$(grep nameserver /etc/resolv.conf | awk '{print $2}' | head -1)
