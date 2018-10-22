@@ -16,4 +16,9 @@ if [ -n "${NGINX_PORT}" ] ; then
   printf "[ok] using custom listen port ${NGINX_PORT}\n"
 fi
 
+if [ -n "${NGINX_MAX_BODY_SIZE}" ] ; then 
+  sed -e "s/client_max_body_size 1m;/client_max_body_size ${NGINX_MAX_BODY_SIZE};/" -i.nginx.port /etc/nginx/conf.d/default.conf
+  printf "[ok] using custom body size ${NGINX_MAX_BODY_SIZE}\n"
+fi
+
 exec "$@"
