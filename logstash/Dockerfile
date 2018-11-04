@@ -12,6 +12,8 @@ RUN cd /etc/logstash/geoip-database && \
     rm -rf bin watchgod_v1.0.2.zip && \
     echo '{"Processes":[{"Name" : "logstash","Command" : ["/opt/logstash/bin/logstash", "-f", "/config-dir/logstash.conf", "--auto-reload"]}]}' > /etc/watchgod.json
 
+RUN logstash-plugin install logstash-output-google_cloud_storage
+
 VOLUME /config-dir/
 
 CMD watchgod -config /etc/watchgod.json boot
