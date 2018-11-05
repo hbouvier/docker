@@ -5,7 +5,7 @@ ADD http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz /etc/l
 RUN cd /etc/logstash/geoip-database && \
     gunzip GeoLiteCity.dat.gz && \
     chmod a+r /etc/logstash/geoip-database/GeoLiteCity.dat && \
-    logstash-plugin install logstash-input-beats && \
+    logstash-plugin install logstash-input-beats logstash-output-google_cloud_storage && \
     cd /tmp && \
     unzip watchgod_v1.0.2.zip && \
     mv bin/linux_amd64/watchgod /bin/ && \
