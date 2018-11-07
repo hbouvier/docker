@@ -1,10 +1,11 @@
 FROM logstash:2.4
 
 ADD https://github.com/hbouvier/watchgod/releases/download/v1.0.2/watchgod_v1.0.2.zip /tmp/
-ADD http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz /etc/logstash/geoip-database/
+ADD http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.tar.gz /etc/logstash/geoip-database/
+
 RUN cd /etc/logstash/geoip-database && \
-    gunzip GeoLiteCity.dat.gz && \
-    chmod a+r /etc/logstash/geoip-database/GeoLiteCity.dat && \
+    tar -xzvf GeoLite2-City.tar.gz && \
+    chmod a+r /etc/logstash/geoip-database/GeoLite2-City_20181106/GeoLite2-City.mmdb && \
     logstash-plugin install logstash-input-beats logstash-output-google_cloud_storage && \
     cd /tmp && \
     unzip watchgod_v1.0.2.zip && \
