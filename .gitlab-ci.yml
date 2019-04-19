@@ -36,3 +36,14 @@ build-branches:
     docker push "${CI_REGISTRY_IMAGE}/${container}:${version}"
   except:
     - master
+
+build-tags:
+  stage: build
+  script: |
+    container=$(echo ${CI_COMMIT_REF_NAME} | awk -F / '{print $1}')
+    version=$(echo ${CI_COMMIT_REF_NAME} | awk -F / '{print $NF}')
+    echo "Building container '${container}' with version '${version}' from branch ${CI_COMMIT_REF_NAME}"
+    docker build --pull -t "${CI_REGISTRY_IMAGE}/${container}:${version}" ./${container}
+    docker push "${CI_REGISTRY_IMAGE}/${container}:${version}"
+  only:
+    - tags
