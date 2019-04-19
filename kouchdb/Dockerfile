@@ -4,6 +4,6 @@ COPY ./src /app
 
 WORKDIR /app
 
-RUN npm install
+RUN npm install --production
 
 CMD node bootstrap
