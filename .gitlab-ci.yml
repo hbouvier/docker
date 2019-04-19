@@ -6,12 +6,22 @@ services:
 before_script:
   - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
+stages:
+- build
+
+# CI_REGISTRY: registry.gitlab.com
+# CI_COMMIT_REF_NAME: nginx/v1.14-alpine-003
+# CI_COMMIT_REF_SLUG: nginx-v1-14-alpine-003
+# CI_PROJECT_NAME: docker
+# CI_COMMIT_SHA: 2f0efe9516165a1e3ecab8470cd4ababbabc99e8
+# CI_REGISTRY_IMAGE: registry.gitlab.com/pod-o-mat/docker
+
 build-master:
   stage: build
   script: |
     for container in $(ls -d */ | sed 's^/^^g') ; do
       docker build --pull -t "${CI_REGISTRY_IMAGE}/${container}" ./${container}
-      docker push "${CI_REGISTRY_IMAGE}/${container}"
+      docker push "${CI_REGISTRY_IMAGE}/${container}:latest"
     done
   only:
     - master
@@ -19,8 +29,10 @@ build-master:
 build-branches:
   stage: build
   script: |
-    container=$(echo ${CI_COMMIT_REF_SLUG} | cut -f1 -d-)
-    docker build --pull -t "${CI_REGISTRY_IMAGE}/${container}:${CI_COMMIT_REF_SLUG/${container}-/}" ./${container}
-    docker push "${CI_REGISTRY_IMAGE}/${container}:${CI_COMMIT_REF_SLUG/${container}-/}"
+    container=$(echo ${CI_COMMIT_REF_NAME} | awk -F / '{print $1}')
+    version=$(echo ${CI_COMMIT_REF_NAME} | awk -F / '{print $NF}')
+    echo "Building container '${container}' with version '${version}' from branch ${CI_COMMIT_REF_NAME}"
+    docker build --pull -t "${CI_REGISTRY_IMAGE}/${container}:${version}" ./${container}
+    docker push "${CI_REGISTRY_IMAGE}/${container}:${version}"
   except:
     - master
