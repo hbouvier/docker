@@ -1,0 +1,168 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: magnetic
+  annotations:
+    storageclass.beta.kubernetes.io/is-default-class: "false"
+  labels:
+    addonmanager.kubernetes.io/mode: EnsureExists
+    kubernetes.io/cluster-service: "true"
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: nifi
+spec:
+  selector:
+    app: nifi
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: nifi
+spec:
+  serviceName: nifi
+  replicas: 1
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: nifi
+    spec:
+      initContainers:
+      - name: permissions
+        image: busybox
+        command:
+          - "/bin/sh"
+          - "-c"
+          - >
+            chown -R 1000:1000 /opt/nifi/nifi-current/database_repository;
+            chown -R 1000:1000 /opt/nifi/nifi-current/flowfile_repository;
+            chown -R 1000:1000 /opt/nifi/nifi-current/content_repository;
+            chown -R 1000:1000 /opt/nifi/nifi-current/provenance_repository;
+            chown -R 1000:1000 /opt/nifi/nifi-current/conf
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: database
+          mountPath: /opt/nifi/nifi-current/database_repository
+        - name: flowfile
+          mountPath: /opt/nifi/nifi-current/flowfile_repository
+        - name: content
+          mountPath: /opt/nifi/nifi-current/content_repository
+        - name: provenance
+          mountPath: /opt/nifi/nifi-current/provenance_repository
+        - name: conf
+          mountPath: /opt/nifi/nifi-current/conf
+      containers:
+      - name: nifi
+        image: registry.gitlab.com/pod-o-mat/docker/nifi:1.9.0
+        env:
+        - name: NIFI_WEB_HTTP_HOST
+          value: 0.0.0.0
+        - name: NIFI_WEB_HTTP_PORT
+          value: "9090"
+        ports:
+        - name: http
+          containerPort: 9090
+        volumeMounts:
+        - name: database
+          mountPath: /opt/nifi/nifi-current/database_repository
+        - name: flowfile
+          mountPath: /opt/nifi/nifi-current/flowfile_repository
+        - name: content
+          mountPath: /opt/nifi/nifi-current/content_repository
+        - name: provenance
+          mountPath: /opt/nifi/nifi-current/provenance_repository
+        - name: conf
+          mountPath: /opt/nifi/nifi-current/conf
+      volumes:
+      - name: database
+        persistentVolumeClaim:
+          claimName: database
+      - name: flowfile
+        persistentVolumeClaim:
+          claimName: flowfile
+      - name: content
+        persistentVolumeClaim:
+          claimName: content
+      - name: provenance
+        persistentVolumeClaim:
+          claimName: provenance
+      - name: conf
+        persistentVolumeClaim:
+          claimName: conf
+      nodeSelector:
+        automat/node-pool: zeppelin
+      tolerations:
+      - effect: NoSchedule
+        key: dedicated
+        operator: Equal
+        value: zeppelin
+  volumeClaimTemplates:
+  - metadata:
+      name: database
+      annotations:
+        volume.beta.kubernetes.io/storage-class: magnetic
+        volume.alpha.kubernetes.io/storage-class: magnetic
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+  - metadata:
+      name: flowfile
+      annotations:
+        volume.beta.kubernetes.io/storage-class: magnetic
+        volume.alpha.kubernetes.io/storage-class: magnetic
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+  - metadata:
+      name: content
+      annotations:
+        volume.beta.kubernetes.io/storage-class: magnetic
+        volume.alpha.kubernetes.io/storage-class: magnetic
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 50Gi
+  - metadata:
+      name: provenance
+      annotations:
+        volume.beta.kubernetes.io/storage-class: magnetic
+        volume.alpha.kubernetes.io/storage-class: magnetic
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+  - metadata:
+      name: conf
+      annotations:
+        volume.beta.kubernetes.io/storage-class: magnetic
+        volume.alpha.kubernetes.io/storage-class: magnetic
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
+
