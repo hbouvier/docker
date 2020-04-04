@@ -5,7 +5,7 @@ A containerized version of NGINX that automatically reload the configuration whe
 ## How to run
 
 ```bash
-$ docker run --name nginx -dti --rm -p 8100:80 -v $(pwd)/samples/conf.d:/etc/nginx/conf.d -v $(pwd)/samples/passwords:/etc/nginx/passwords hbouvier/nginx:1.13-alpine-001
+$ docker run --name nginx -dti --rm -p 8100:80 -v $(pwd)/samples/conf.d:/etc/nginx/conf.d -v $(pwd)/samples/passwords:/etc/nginx/passwords hbouvier/nginx:1.17.9-alpine-001
 ```
 
 Test that the container is responding properly

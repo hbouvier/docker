@@ -9,7 +9,7 @@ ADD https://github.com/hbouvier/watchgod/releases/download/v${WATCHDOG_VERSION}/
 RUN unzip watchgod.v${WATCHDOG_VERSION}.zip && \
     mv /app/bin/linux_amd64/watchgod /app/release/bin/
 
-FROM nginx:1.14-alpine
+FROM nginx:1.17.9-alpine
 COPY --from=build /app/release /
 
 RUN apk update && \
