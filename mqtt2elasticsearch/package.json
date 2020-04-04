@@ -1,0 +1,15 @@
+{
+  "name": "mqtt2elasticsearch",
+  "version": "1.0.0",
+  "description": "Read messages from a MQTT topic and write them to elasticsearch",
+  "main": "mqtt2elasticsearch.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Henri Bouiver",
+  "license": "BSD",
+  "dependencies": {
+    "elasticsearch": "^16.7.1",
+    "mqtt": "^3.0.0"
+  }
+}
